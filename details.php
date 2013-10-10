@@ -10,7 +10,10 @@ $itemkey = $_REQUEST['itemkey'];
 purge_cache(realpath("./" . $cache_dir), $cache_age);
 
 // reading item details from API
-$item = $zotero->getItem($user_ID, $itemkey, array(format=>'atom'));
+$item = $zotero->getItem($user_ID, $itemkey, array('format'=>'atom'));
+if (!isset($offset)) {
+   $offset = 0;
+}
 $content = substr($item,strpos($item, "<content type="), strpos($item, "</content>") - strpos($item, "<content type=", $offset) + 10);
 
 // displaying content of main item
@@ -19,7 +22,7 @@ echo($content . "\n<hr>\n");
 echo("<h2>Attachments</h2><hr>\n");
 
 // getting child items from API, parsing data, displaying results
-$child_items = $zotero->getItemChildren($user_ID, $itemkey, array(format=>'atom', limit=>99));
+$child_items = $zotero->getItemChildren($user_ID, $itemkey, array('format'=>'atom', 'limit'=>99));
 $offset=0;
 $pos = strpos($child_items, "<entry>", $offset);
 while ($pos !== false) {

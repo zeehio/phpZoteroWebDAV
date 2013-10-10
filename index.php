@@ -4,25 +4,37 @@ require_once 'inc/include.php';
 require_once 'inc/phpZotero.php';
 include_once 'inc/header.php';  // HTML header including css file
 $zotero = new phpZotero($API_key);
-$ipp=$_REQUEST['ipp']; 
-if (!($ipp)) $ipp = $def_ipp;
-$sort=$_REQUEST['sort']; 
-if (!($sort)) $sort = $def_sort;
-$sortorder=$_REQUEST['sortorder']; 
-if (!($sortorder)) $sortorder = $def_sortorder;
-$page=$_REQUEST['page']; 
-if (!($page)) $page = 1;
+if (isset($_REQUEST['ipp'])) {
+   $ipp=$_REQUEST['ipp']; 
+} else {
+   $ipp = $def_ipp;
+}
+if (isset($_REQUEST['sort'])) {
+   $sort=$_REQUEST['sort']; 
+} else {
+   $sort = $def_sort;
+}
+if (isset($_REQUEST['sortorder'])) {
+   $sortorder=$_REQUEST['sortorder'];
+} else {
+   $sortorder = $def_sortorder;
+}
+if (isset($_REQUEST['page'])) {
+   $page=$_REQUEST['page']; 
+} else {
+   $page = 1;
+}
 
 //purge old files from the cache
 purge_cache(realpath("./" . $cache_dir), $cache_age);
 
 $i = 0;
-$item = array( 0 => array(title=>"", itemKey=>"", creatorSummary=>"", year=>"", numChildren=>""));
+$item = array( 0 => array('title'=>"", 'itemKey'=>"", 'creatorSummary'=>"", 'year'=>"", 'numChildren'=>""));
 
 // get first set of items from API
 $start = ($page - 1) * $ipp;
 if ($ipp > $fetchlimit) $limit = $fetchlimit; else $limit = $ipp;
-$items = $zotero->getItemsTop($user_ID, array(format=>'atom', content=>'none', start=>$start, limit=>$limit, order=>$sort, sort=>$sortorder));
+$items = $zotero->getItemsTop($user_ID, array('format'=>'atom', 'content'=>'none', 'start'=>$start, 'limit'=>$limit, 'order'=>$sort, 'sort'=>$sortorder));
 $totalitems = intval(substr($items,strpos($items, "<zapi:totalResults>") + 19, strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
 
 // MAIN DATA TABLE
@@ -44,7 +56,7 @@ while (($i < ($ipp - 1)) && (strpos($items, "<entry>")>0)) {
         if (strpos($entry, "<zapi:creatorSummary>")>0) $item_creatorSummary = substr($entry,strpos($entry, "<zapi:creatorSummary>") + 21, strpos($entry, "</zapi:creatorSummary>") - strpos($entry, "<zapi:creatorSummary>") - 21);
         if (strpos($entry, "<zapi:year>")>0) $item_year = substr($entry,strpos($entry, "<zapi:year>") + 11, strpos($entry, "</zapi:year>") - strpos($entry, "<zapi:year>") - 11);
         if (strpos($entry, "<zapi:numChildren>")>0) $item_numChildren = substr($entry,strpos($entry, "<zapi:numChildren>") + 18, strpos($entry, "</zapi:numChildren>") - strpos($entry, "<zapi:numChildren>") - 18);
-        $item[$i] = array(title=>$item_title, itemKey=>$item_itemKey, creatorSummary=>$item_creatorSummary, year=>$item_year, numChildren=>$item_numChildren);
+        $item[$i] = array('title'=>$item_title, 'itemKey'=>$item_itemKey, 'creatorSummary'=>$item_creatorSummary, 'year'=>$item_year, 'numChildren'=>$item_numChildren);
         echo("<tr>");
         echo("<td><a href=\"details.php?itemkey="  . $item[$i]['itemKey'] . "\">" . $item[$i]['numChildren'] . "</a></td>");
         echo("<td><a href=\"details.php?itemkey="  . $item[$i]['itemKey'] . "\">" . $item[$i]['creatorSummary'] . "</a></td>");
@@ -55,7 +67,7 @@ while (($i < ($ipp - 1)) && (strpos($items, "<entry>")>0)) {
         $offset = strpos($items, "</entry>", $offset) + 8;
         $pos = strpos($items, "<entry>", $offset);
     }
-    $items = $zotero->getItemsTop($user_ID, array(format=>'atom', content=>'none', start=>($start+$i), limit=>$limit, order=>$sort, sort=>$sortorder));    
+    $items = $zotero->getItemsTop($user_ID, array('format'=>'atom', 'content'=>'none', 'start'=>($start+$i), 'limit'=>$limit, 'order'=>$sort, 'sort'=>$sortorder));    
 }
 echo("</table><br>\n\n");
 echo(($start +1) . " to " . ($start + $i) . " of " . $totalitems);
